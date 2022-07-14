@@ -1,177 +1,343 @@
-import { getFromStorage, checkStorage, setInStorage } from "../functions/storage";
+import { _alert, _confirm } from '../functions/message';
+import { isValidEmail } from "../functions/validate";
+import { getFromStorage, setInStorage } from "../functions/storage";
 
-$(function() {
-  let validador = {
-    handleSubmit: event => {
-      event.preventDefault()
-      let send = true
-
-      let inputs = form.querySelectorAll('.val')
-      let tel = document.getElementById('phone').value
-
-      validador.clearErrors()
-
-      for (let i = 0; i < inputs.length; i++) {
-        let input = inputs[i]
-        let check = validador.checkInput(input)
-        if (check !== true) {
-          send = false
-          validador.showError(input, check)
-        }
-      }
-
-      if (send) {
-        form.submit()
-        validador.salveStorage()
-      }
-    },
-    checkInput: input => {
-      let rules = input.getAttribute('data-rules')
-
-      if (rules !== null) {
-        rules = rules.split('|')
-        for (let k in rules) {
-          let rDetails = rules[k].split('=')
-          switch (rDetails[0]) {
-            case 'required':
-              if (input.value == '') {
-                return 'Campo não pode ser vazio.'
-              }
-              break
-            case 'min':
-              if (input.value.length < rDetails[1]) {
-                return (
-                  'Campo tem que ter pelo menos ' + rDetails[1] + ' caractes'
-                )
-              }
-              break
-            case 'email':
-              if (input.value != '') {
-                let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                if (!regex.test(input.value.toLowerCase())) {
-                  return 'E-mail digitado não é válido!'
-                }
-              }
-              break
-              case 'phone':
-              if (!validador.isValidPhone(input.value)) {
-                return 'Digite número válido '
-              }
-              break
-          }
-        }
-      }
-
-      return true
-    },
-    showError: (input, error) => {
-      input.style.borderColor = '#FF0000'
-
-      let errorElement = document.createElement('div')
-      errorElement.classList.add('error')
-      errorElement.innerHTML = error
-
-      input.parentElement.insertBefore(errorElement, input.ElementSibling)
-    },
-    clearErrors: () => {
-      let inputs = form.querySelectorAll('.val')
-      for (let i = 0; i < inputs.length; i++) {
-        inputs[i].style = ''
-      }
-
-      let errorElements = document.querySelectorAll('.error')
-      for (let i = 0; i < errorElements.length; i++) {
-        errorElements[i].remove()
-      }
-    },
-    isValidPhone: (phone) => {
+function isValidPhone (phone) {
   
-      phone = phone.replace(/\D/g, '');
-    
-      if (!(phone.length >= 10 && phone.length <= 11)) return false;
-    
-      if (phone.length == 11 && parseInt(phone.substring(2, 3)) != 9) return false;
-    
-      for (var n = 0; n < 10; n++) {
-          if (phone == new Array(11).join(n) || phone == new Array(12).join(n)) return false;
-      }
-      
-      var DDD = [11, 12, 13, 14, 15, 16, 17, 18, 19,
-          21, 22, 24, 27, 28, 31, 32, 33, 34,
-          35, 37, 38, 41, 42, 43, 44, 45, 46,
-          47, 48, 49, 51, 53, 54, 55, 61, 62,
-          64, 63, 65, 66, 67, 68, 69, 71, 73,
-          74, 75, 77, 79, 81, 82, 83, 84, 85,
-          86, 87, 88, 89, 91, 92, 93, 94, 95,
-          96, 97, 98, 99];
-          
-      if (DDD.indexOf(parseInt(phone.substring(0, 2))) == -1) return false;
-    
-      if (phone.length == 10 && [2, 3, 4, 5, 7].indexOf(parseInt(phone.substring(2, 3))) == -1) return false;
-    
-      return true;
-    },
-    salveStorage: () => {
-      let nome = document.getElementById('name').value;
-      let email = document.getElementById('email').value;
-      let phone = document.getElementById('phone').value;
-      let assunto = document.getElementById('assunto').value;
-      let mensagem = document.getElementById('mensagem').value;
+  phone = phone.replace(/\D/g, '');
 
-      setInStorage('nome', nome);
-      setInStorage('email', email);
-      setInStorage('phone', phone);
-      setInStorage('assunto', assunto);
-      setInStorage('mensagem', mensagem);
-    }
+  if (!(phone.length >= 10 && phone.length <= 11)) return false;
+
+  if (phone.length == 11 && parseInt(phone.substring(2, 3)) != 9) return false;
+
+  for (var n = 0; n < 10; n++) {
+      if (phone == new Array(11).join(n) || phone == new Array(12).join(n)) return false;
   }
-  $("#name").on('keyup', function(){
-    var item = $(this);
-    if(item.val()) {
-      $(".nameInput").text(item.val());
-    } else {
-      $(".nameInput").text("---");
+  
+  var DDD = [11, 12, 13, 14, 15, 16, 17, 18, 19,
+      21, 22, 24, 27, 28, 31, 32, 33, 34,
+      35, 37, 38, 41, 42, 43, 44, 45, 46,
+      47, 48, 49, 51, 53, 54, 55, 61, 62,
+      64, 63, 65, 66, 67, 68, 69, 71, 73,
+      74, 75, 77, 79, 81, 82, 83, 84, 85,
+      86, 87, 88, 89, 91, 92, 93, 94, 95,
+      96, 97, 98, 99];
+      
+  if (DDD.indexOf(parseInt(phone.substring(0, 2))) == -1) return false;
+
+  if (phone.length == 10 && [2, 3, 4, 5, 7].indexOf(parseInt(phone.substring(2, 3))) == -1) return false;
+
+  return true;
+}
+
+function loadingTable() {
+
+  let session = getFromStorage('dbClient');
+
+    if(session) {
+      
+      var infos = JSON.parse(session);
+
+      $("#showMessage").fadeOut();
+      $(".table").find("thead").remove();
+      $(".table").find("tr").remove();
+      $(".table").find("th").remove();
+      $(".table").find("td").remove();
+
+      var tabela = "<thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Assunto</th><th>Ação</th></tr></thead><tbody>";
+
+      infos.forEach(function(val, key){
+
+        tabela += "<tr><td>"+val.name+"</td><td>"+val.email+"</td><td>"+val.tel+"</td><td>"+val.ass+"</td><td><button class='ui button' id='editData' data-id='"+key+"'>Editar</button><button class='ui red button' id='removeData' data-id='"+key+"'>Remover</button></td></tr>";
+
+      });
+
+      tabela += "</tbody>";
+
+      $(".table").append(tabela);
+      
+    }
+}
+
+$(function(){
+
+  loadingTable();
+
+    $('.ui.form.formContact')
+  .form({
+    on: 'blur',
+    fields: {
+        nome: {
+        identifier: 'nome',
+        rules: [
+          {
+            type   : 'empty',
+            prompt : 'Informe um nome!'
+          }
+        ]
+      },
+      email: {
+        identifier: 'email',
+        rules: [
+          {
+            type   : 'email',
+            prompt : 'Informe um e-mail válido!'
+          }
+        ]
+      },
+      tel: {
+        identifier: 'tel',
+        rules: [
+          {
+            type   : 'empty',
+            prompt : 'Informe um telefone!'
+          },
+          {
+            type   : 'minLength[14]',
+            prompt : 'Informe um telefone correto!'
+          }
+
+        ]
+      },
+      assunto: {
+        identifier: 'assunto',
+        rules: [
+          {
+            type   : 'empty',
+            prompt : 'Informe um assunto!'
+          }
+        ]
+      },
+      mensagem: {
+        identifier: 'mensagem',
+        rules: [
+          {
+            type   : 'empty',
+            prompt : 'Informe uma mensagem!'
+          },
+          {
+            type   : 'maxLength[100]',
+            prompt : 'Insira no máximo 100 caracteres!'
+          }
+        ]
+      }
+    },
+    onSuccess: function (event) {     
+
+        event.preventDefault();
+
+        return false;
     }
   });
 
-  $("#email").on('keyup', function(){
+  $("#input_name").on('keyup', function(){
     var item = $(this);
     if(item.val()) {
-      $(".emailInput").text(item.val());
+      $(".inputName").text(item.val());
     } else {
-      $(".emailInput").text("---");
+      $(".inputName").text("");
     }
   });
 
-  $("#phone").on('keyup', function(){
+  $("#input_email").on('keyup', function(){
     var item = $(this);
     if(item.val()) {
-      $(".phoneInput").text(item.val());
+      $(".inputEmail").text(item.val());
     } else {
-      $(".phoneInput").text("---");
+      $(".inputEmail").text("");
     }
   });
 
-  $("#assunto").on('keyup', function(){
+  $("#input_tel").on('keyup', function(){
     var item = $(this);
     if(item.val()) {
-      $(".assuntoInput").text(item.val());
+      $(".inputTel").text(item.val());
     } else {
-      $(".assuntoInput").text("---");
+      $(".inputTel").text("");
     }
   });
 
-  $("#mensagem").on('keyup', function(){
+  $("#input_assunto").on('keyup', function(){
     var item = $(this);
     if(item.val()) {
-      $(".mensagemInput").text(item.val());
+      $(".inputAssunto").text(item.val());
     } else {
-      $(".mensagemInput").text("---");
+      $(".inputAssunto").text("");
     }
   });
 
+  $("#input_mensagem").on('keyup', function(){
+    var item = $(this);
+    if(item.val()) {
+      $(".inputMensagem").text(item.val());
+    } else {
+      $(".inputMensagem").text("");
+    }
+  });
 
-  let form = document.querySelector('#formContact')
-  form.addEventListener('submit', validador.handleSubmit);
+  $(".formContact").submit(function(e){
+    e.preventDefault();
 
-})
+      var form = $(this);
+      var formData = form.serializeArray();
+        
+      var name = $('#input_name').val();
+      var email = $('#input_email').val();
+      var tel = $('#input_tel').val();
+      var ass = $('#input_assunto').val();
+      var me = $('#input_mensagem').val();
+
+      if(!isValidEmail(email)) {
+
+        swal({
+          text: 'Informe um E-mail válido!',
+          type: 'info',
+          showCancelButton: false,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'OK'
+        });
+
+        return false;
+      }
+
+      if(!isValidPhone(tel)) {
+
+        swal({
+          text: 'Informe um Telefone válido!',
+          type: 'info',
+          showCancelButton: false,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'OK'
+        });
+
+        return false;
+
+      }
+
+      var item = getFromStorage('dbClient');
+      if(item) {
+
+          var arrItem = JSON.parse(item);
+
+          let userFormCertificaArr = {
+            'name': name,
+            'email': email,
+            'tel': tel,
+            'ass': ass,
+            'me': me
+          }
+
+          var edit = $("#input_chave").val();
+          if(edit) {
+
+            arrItem[edit] = userFormCertificaArr;
+
+          } else {
+            arrItem.push(userFormCertificaArr);
+          }
+
+          setInStorage('dbClient', JSON.stringify(arrItem));
+
+      } else {
+
+        let userFormCertificaArr = [{
+          'name': name,
+          'email': email,
+          'tel': tel,
+          'ass': ass,
+          'me': me
+        }]
+
+        setInStorage('dbClient', JSON.stringify(userFormCertificaArr));
+
+      }
+
+      form.find("input").val("");
+      form.find("textarea").val("");
+      $(".input_name").text("");
+      $(".input_email").text("");
+      $(".input_tel").text("");
+      $(".input_assunto").text("");
+      $(".input_mensagem").text("");
+
+      swal({
+        text: 'Sucesso!',
+        type: 'success',
+        showCancelButton: false,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'OK'
+      });
+
+      loadingTable();
+
+      return false;
+  
+  });
+
+  $(".table").on("click", "#editData", function(){
+
+    var key = $(this).data('id');
+
+    let session = getFromStorage('dbClient');
+    var infos = JSON.parse(session);
+
+    $("#input_name").val(infos[key].name);
+    $(".input_name").text(infos[key].name);
+    $("#input_email").val(infos[key].email);
+    $(".input_email").text(infos[key].email);
+    $("#input_assunto").val(infos[key].ass);
+    $(".input_assunto").text(infos[key].ass);
+    $("#input_mensagem").val(infos[key].me);
+    $(".input_mensagem").text(infos[key].me);
+    $("#input_tel").val(infos[key].tel);
+    $(".input_tel").text(infos[key].tel);
+    $("#input_chave").val(key);
+
+    document.querySelector('.menuheader').scrollIntoView({
+      behavior: 'smooth'
+    });
+
+
+  });
+
+  $(".table").on("click", "#removeData", function(){
+
+    var key = $(this).data('id');
+
+    let session = getFromStorage('dbClient');
+    var infos = JSON.parse(session);
+
+    swal({
+      title: 'Tem certeza que deseja remover?',
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, Eu Quero!',
+      cancelButtonText: 'Não Quero!'
+    }).then((result) => {
+
+      if (result) {
+
+        infos.splice(key, 1);
+        setInStorage('dbClient', JSON.stringify(infos));
+
+        swal({
+          text: 'Removido com sucesso!',
+          type: 'success',
+          showCancelButton: false,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'OK'
+        });
+  
+        loadingTable();
+      }
+    })
+  });
+});
+
+
